@@ -3,6 +3,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import { Route, Switch } from "wouter";
 
 function App() {
   return (
@@ -10,7 +12,10 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster position="bottom-right" />
-          <Home />
+          <Switch>
+            <Route path="/login" component={Login} />
+            <Route path="/" component={Home} />
+          </Switch>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
