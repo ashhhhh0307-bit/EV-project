@@ -1,63 +1,39 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, BatteryCharging, Bolt, Check, LockKeyhole, Menu, ShieldCheck, Sparkles, X, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, BatteryCharging, Bolt, Check, CircleHelp, LockKeyhole, UserRound, Zap } from "lucide-react";
 import { startLogin } from "@/const";
 import { LOGIN_TRUST_POINTS } from "@shared/loginExperience";
 
-const orbitItems = [
-  { label: "Battery health", value: "94%", className: "orbit-card battery-card", icon: <BatteryCharging size={16} /> },
-  { label: "Documents", value: "Encrypted", className: "orbit-card vault-card", icon: <LockKeyhole size={15} /> },
-  { label: "Registry status", value: "Verified", className: "orbit-card verified-card", icon: <ShieldCheck size={15} /> },
-];
+type LoginStep = "choice" | "register" | "help";
 
 export default function Login() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [revealed, setRevealed] = useState(false);
+  const [step, setStep] = useState<LoginStep>("choice");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setRevealed(true), 80);
+    const timer = window.setTimeout(() => setReady(true), 80);
     return () => window.clearTimeout(timer);
   }, []);
 
   return (
-    <div className={`login-page ${revealed ? "is-revealed" : ""}`}>
-      <div className="login-noise" />
-      <div className="energy-grid" />
-      <div className="energy-glow glow-one" />
-      <div className="energy-glow glow-two" />
-      <div className="energy-glow glow-three" />
-      <div className="login-particles" aria-hidden="true">
-        {Array.from({ length: 18 }).map((_, index) => <i key={index} style={{ "--i": index } as React.CSSProperties} />)}
-      </div>
+    <div className={`route-login-page ${ready ? "is-ready" : ""}`}>
+      <section className="route-hero">
+        <div className="route-brand"><span className="route-brand-mark"><Bolt size={14} /></span><span>Volt Route</span></div>
+        <div className="route-map" aria-hidden="true">
+          <svg viewBox="0 0 900 640" preserveAspectRatio="xMidYMax slice"><path className="route-path" d="M -40 340 C 120 260, 160 420, 300 360 S 520 220, 620 300 S 760 460, 900 380" /><g className="route-node"><circle cx="10" cy="330" r="5" /></g><g className="route-node charged"><circle cx="300" cy="360" r="5.5" /></g><g className="route-node"><circle cx="470" cy="255" r="5" /></g><g className="route-node charged"><circle cx="620" cy="300" r="5.5" /></g><g className="route-node"><circle cx="790" cy="430" r="5" /></g><circle className="route-pulse" r="3.4" /></svg>
+        </div>
+        <div className="route-hero-copy"><h1>One registration.<br />Every charging bay on your route.</h1><p>Volt Route links your driver profile to the charging network — plan stops, verify your identity at the bay, and get moving again without paperwork.</p><div className="route-stats"><div><strong>2,300+</strong><span>charging bays live</span></div><div><strong>4 min</strong><span>average sign-up</span></div><div><strong>24/7</strong><span>help desk coverage</span></div></div></div>
+      </section>
 
-      <header className="login-nav">
-        <a className="login-brand" href="/" aria-label="VoltPath home"><span className="login-brand-mark"><Bolt size={19} strokeWidth={2.7} /></span><span><b>volt<span>path</span></b><small>EV REGISTRY / 01</small></span></a>
-        <div className="login-nav-links"><a href="#why-voltpath">Why VoltPath</a><a href="#security">Security</a><a href="#support">Support</a></div>
-        <div className="login-nav-meta"><span><i className="online-dot" /> SYSTEMS OPERATIONAL</span><button className="login-menu" onClick={() => setMobileOpen((value) => !value)} aria-label="Open menu">{mobileOpen ? <X size={19} /> : <Menu size={19} />}</button></div>
-      </header>
-      {mobileOpen && <div className="login-mobile-links"><a href="#why-voltpath" onClick={() => setMobileOpen(false)}>Why VoltPath</a><a href="#security" onClick={() => setMobileOpen(false)}>Security</a><a href="#support" onClick={() => setMobileOpen(false)}>Support</a></div>}
-
-      <main className="login-main">
-        <section className="login-copy">
-          <div className="login-eyebrow"><span className="eyebrow-line" /> THE IDENTITY LAYER FOR YOUR EV</div>
-          <h1>Own the<br /><em>electric</em> future<span className="login-period">.</span></h1>
-          <p className="login-description">One calm, intelligent place for your vehicle, its documents, and every mile ahead.</p>
-          <button className="login-cta" onClick={() => startLogin()}><span>Enter your workspace</span><span className="cta-arrow"><ArrowRight size={17} /></span></button>
-          <div className="login-trust">{LOGIN_TRUST_POINTS.map((point) => <span key={point}><Check size={13} /> {point}</span>)}</div>
-        </section>
-
-        <section className="login-visual" aria-label="VoltPath vehicle intelligence preview">
-          <div className="visual-label label-top"><span>LIVE VEHICLE SIGNAL</span><i /></div>
-          <div className="visual-ring ring-outer" /><div className="visual-ring ring-mid" /><div className="visual-ring ring-inner" />
-          <div className="energy-core"><div className="core-aura" /><div className="core-bolt"><Zap size={36} fill="currentColor" /></div><div className="core-pulse pulse-one" /><div className="core-pulse pulse-two" /></div>
-          <div className="orbit-line orbit-left" /><div className="orbit-line orbit-right" />
-          {orbitItems.map((item, index) => <div className={`${item.className} ${index === 1 ? "delay-two" : index === 2 ? "delay-three" : ""}`} key={item.label}><div className="orbit-icon">{item.icon}</div><div><span>{item.label}</span><strong>{item.value}</strong></div></div>)}
-          <div className="visual-caption"><Sparkles size={14} /><span>Everything you need to move with confidence.</span></div>
-          <div className="visual-axis axis-h" /><div className="visual-axis axis-v" />
-        </section>
-      </main>
-
-      <footer className="login-footer"><span>VOLTPath / 2026</span><span className="footer-center"><i /> A digital home for the electric age</span><span>Made for the journey ahead <ArrowRight size={13} /></span></footer>
-      <div className="login-scroll-hint"><span>SCROLL TO EXPLORE</span><i /></div>
+      <section className="route-stage"><div className="route-card">
+        {step !== "choice" && <button className="route-back" onClick={() => setStep("choice")}><ArrowLeft size={14} /> Back</button>}
+        {step === "choice" && <><p className="route-eyebrow">Driver access</p><h2>How can we help you today?</h2><p className="route-sub">Pick the option that matches where you are in the process.</p><div className="route-choices"><button className="route-choice" onClick={() => setStep("register")}><span className="route-choice-icon"><UserRound size={19} /></span><span><strong>New Login</strong><small>Register your details for the first time</small></span><ArrowRight size={17} /></button><button className="route-choice" onClick={() => setStep("help")}><span className="route-choice-icon"><CircleHelp size={19} /></span><span><strong>Request Help</strong><small>Already registered — verify and continue</small></span><ArrowRight size={17} /></button></div></>}
+        {step === "register" && <AccessStep eyebrow="New Login" title="Set up your registration" sub="Create your secure VoltPath profile and continue to the EV workspace." icon={<UserRound size={21} />} action="Continue with secure sign-in" onAction={startLogin} />}
+        {step === "help" && <AccessStep eyebrow="Request Help" title="Verify to continue" sub="Sign in securely with your verified account to reach the EV workspace and support tools." icon={<LockKeyhole size={21} />} action="Sign in securely" onAction={startLogin} />}
+      </div><div className="route-footer"><span>Secure access powered by VoltPath</span><span>{LOGIN_TRUST_POINTS.join(" · ")}</span></div></section>
     </div>
   );
+}
+
+function AccessStep({ eyebrow, title, sub, icon, action, onAction }: { eyebrow: string; title: string; sub: string; icon: React.ReactNode; action: string; onAction: () => void }) {
+  return <div className="route-access"><div className="route-access-icon">{icon}</div><p className="route-eyebrow">{eyebrow}</p><h2>{title}</h2><p className="route-sub">{sub}</p><div className="route-secure-note"><span><Check size={14} /></span><div><strong>Your account stays protected</strong><small>Manus OAuth handles sign-in securely. No password is stored in this app.</small></div></div><button className="route-primary" onClick={onAction}>{action}<ArrowRight size={16} /></button></div>;
 }
