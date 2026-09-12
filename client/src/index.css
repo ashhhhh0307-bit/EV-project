@@ -54,3 +54,23 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 @media (max-width: 800px) { .sidebar { position:fixed; left:-270px; width:252px; transition:left .22s ease; box-shadow:14px 0 35px rgba(8,9,25,.2); }.sidebar.mobile-open { left:0; }.close-mobile { display:block; }.mobile-scrim { position:fixed; inset:0; z-index:19; background:rgba(16,17,34,.35); }.mobile-menu { display:grid; place-items:center; }.topbar { height:70px; padding:0 18px; }.page-heading span { display:none; }.global-search { width:35px; border-color:transparent; background:transparent; }.global-search input,.global-search kbd { display:none; }.topbar-actions { gap:5px; }.add-button span { display:none; }.add-button { width:35px; padding:0; }.page-content { padding:28px 18px 40px; }.stats-grid { grid-template-columns:1fr 1fr; }.featured-vehicle { grid-template-columns:1fr; }.vehicle-visual { min-height:220px; }.vehicle-details { padding:18px; }.right-rail,.lower-grid,.analytics-grid { grid-template-columns:1fr; }.vehicle-grid { grid-template-columns:1fr; }.add-vehicle-card { min-height:180px; }.document-summary { flex-wrap:wrap; gap:15px; }.document-summary > div:not(.storage-meter) { min-width:80px; padding-right:15px; margin-right:0; }.storage-meter { max-width:none; min-width:100%; }.document-row { grid-template-columns:1.8fr 1fr 25px; }.document-row > :nth-child(2),.document-row > :nth-child(4),.document-row.table-head > :nth-child(2),.document-row.table-head > :nth-child(4) { display:none; }.verification-layout { grid-template-columns:1fr; }.queue-overview { flex-wrap:wrap; }.queue-stat { flex:1; }.analytics-stats { grid-template-columns:1fr 1fr; }.settings-grid { grid-template-columns:1fr; }.settings-nav { display:flex; overflow:auto; }.settings-nav button { white-space:nowrap; }.welcome-row,.list-toolbar { align-items:flex-start; flex-direction:column; }.toolbar-actions { width:100%; }.toolbar-actions > * { flex:1; }.wizard-body { padding:24px 20px; }.wizard-progress { padding:16px 15px; }.wizard-step span { display:none; }.wizard-footer { padding:13px 18px; }.save-copy { display:none; }.success-modal { padding:32px 22px; } }
 @media (max-width: 480px) { .stats-grid { gap:7px; }.stat-card { padding:12px; min-height:118px; }.stat-value { font-size:22px; }.fleet-panel,.alert-panel,.activity-panel,.timeline-panel,.chart-panel,.manufacturers-panel { padding:17px; }.vehicle-footer { align-items:stretch; flex-direction:column; }.outline-button { height:34px; }.vehicle-metrics strong { font-size:16px; }.bottom-insight { align-items:flex-start; }.bottom-insight > button { display:none; }.document-summary > div:not(.storage-meter) { flex:1; min-width:40%; border:0; padding:0; }.review-facts { grid-template-columns:1fr 1fr; gap:12px; }.review-actions { flex-direction:column; }.wizard-fields { grid-template-columns:1fr; }.wizard-fields label.wide,.wizard-fields .wide,.prefill-note { grid-column:auto; }.wizard-copy h2 { font-size:21px; } }
 @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+/* no-default-data empty states */
+.empty-panel { min-height: 380px; }
+.empty-page-panel { min-height: 420px; display: grid; place-items: center; }
+.empty-side-panel { min-height: 218px; padding: 22px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.empty-state.large { min-height: 280px; padding: 25px; }
+.empty-state.compact { min-height: 118px; padding: 8px 16px 18px; }
+.empty-orb { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 15px; margin-bottom: 14px; }
+.empty-orb.teal { color: #2b9b89; background: #e0f7f1; }
+.empty-orb.violet { color: #7c72c3; background: #eeecfb; }
+.empty-orb.amber { color: #b47b37; background: #fff0da; }
+.empty-orb.blue { color: #5b83b2; background: #e8f1fb; }
+.empty-state h4 { margin: 0; color: #35364b; font: 600 17px 'Space Grotesk', sans-serif; letter-spacing: -.35px; }
+.empty-state p { max-width: 390px; margin: 9px 0 17px; color: #9698a8; font-size: 10px; line-height: 1.6; }
+.empty-state.compact h4 { font-size: 13px; }
+.empty-state.compact p { max-width: 220px; margin: 0; font-size: 9px; }
+.empty-state .soft-action { width: auto; margin: 0; padding: 9px 12px; border: 1px solid #d5eee8; border-top: 1px solid #d5eee8; background: #effaf7; border-radius: 6px; }
+.standalone { display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: #2d8278; font-size: 9px; font-weight: 700; }
+@media (max-width: 800px) { .empty-panel { min-height: 330px; } .empty-page-panel { min-height: 340px; } .empty-side-panel { min-height: 185px; } }
