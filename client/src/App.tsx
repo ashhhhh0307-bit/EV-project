@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import AutoSwap from "./pages/AutoSwap";
 import Login from "./pages/Login";
 
 function AuthGate() {
@@ -20,7 +20,7 @@ function AuthGate() {
     );
   }
 
-  return user ? <Home /> : <Login />;
+  return user ? <AutoSwap /> : <Login />;
 }
 
 function App() {

@@ -1,11 +1,20 @@
-import { eq } from "drizzle-orm";
+import { and, count, desc, eq, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import {
+  autoswapReplacementRequests,
+  autoswapRentals,
+  autoswapServiceCenters,
+  autoswapVehicles,
+  InsertAutoswapReplacementRequest,
+  InsertAutoswapServiceCenter,
+  InsertAutoswapVehicle,
+  InsertUser,
+  users,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -19,35 +28,22 @@ export async function getDb() {
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
+  if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
   if (!db) {
     console.warn("[Database] Cannot upsert user: database not available");
     return;
   }
-
   try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
+    const values: InsertUser = { openId: user.openId };
     const updateSet: Record<string, unknown> = {};
-
     const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
+    for (const field of textFields) {
+      if (user[field] === undefined) continue;
+      const normalized = user[field] ?? null;
       values[field] = normalized;
       updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
+    }
     if (user.lastSignedIn !== undefined) {
       values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
@@ -59,18 +55,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = 'admin';
       updateSet.role = 'admin';
     }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    values.lastSignedIn ??= new Date();
+    if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
+    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
@@ -79,14 +66,88 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
+  if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+async function countRows(table: any) {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ value: count() }).from(table);
+  return Number(result[0]?.value ?? 0);
+}
+
+export async function getAutoSwapSnapshot() {
+  const [vehicles, availableVehicles, centers, openRequests, activeRentals, totalRentals] = await Promise.all([
+    countRows(autoswapVehicles),
+    (async () => { const db = await getDb(); if (!db) return 0; const r = await db.select({ value: count() }).from(autoswapVehicles).where(eq(autoswapVehicles.status, "available")); return Number(r[0]?.value ?? 0); })(),
+    countRows(autoswapServiceCenters),
+    (async () => { const db = await getDb(); if (!db) return 0; const r = await db.select({ value: count() }).from(autoswapReplacementRequests).where(or(eq(autoswapReplacementRequests.status, "open"), eq(autoswapReplacementRequests.status, "matched"))); return Number(r[0]?.value ?? 0); })(),
+    (async () => { const db = await getDb(); if (!db) return 0; const r = await db.select({ value: count() }).from(autoswapRentals).where(or(eq(autoswapRentals.status, "reserved"), eq(autoswapRentals.status, "active"))); return Number(r[0]?.value ?? 0); })(),
+    countRows(autoswapRentals),
+  ]);
+  return { vehicles, availableVehicles, centers, openRequests, activeRentals, totalRentals };
+}
+
+export async function listAutoswapVehicles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(autoswapVehicles).orderBy(desc(autoswapVehicles.createdAt));
+}
+
+export async function listAutoswapServiceCenters() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(autoswapServiceCenters).orderBy(desc(autoswapServiceCenters.createdAt));
+}
+
+export async function listAutoswapRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(autoswapReplacementRequests).orderBy(desc(autoswapReplacementRequests.createdAt));
+}
+
+export async function listAutoswapRentals() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(autoswapRentals).orderBy(desc(autoswapRentals.createdAt));
+}
+
+export async function createAutoswapVehicle(input: Omit<InsertAutoswapVehicle, "ownerId">, ownerId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(autoswapVehicles).values({ ...input, ownerId });
+  return Number(result[0].insertId);
+}
+
+export async function createAutoswapServiceCenter(input: Omit<InsertAutoswapServiceCenter, "ownerId">, ownerId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(autoswapServiceCenters).values({ ...input, ownerId });
+  return Number(result[0].insertId);
+}
+
+export async function createAutoswapRequest(input: Omit<InsertAutoswapReplacementRequest, "customerId">, customerId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(autoswapReplacementRequests).values({ ...input, customerId });
+  return Number(result[0].insertId);
+}
+
+export async function matchAutoswapRequest(requestId: number, vehicleId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const requests = await db.select().from(autoswapReplacementRequests).where(eq(autoswapReplacementRequests.id, requestId)).limit(1);
+  const vehicles = await db.select().from(autoswapVehicles).where(eq(autoswapVehicles.id, vehicleId)).limit(1);
+  const request = requests[0];
+  const vehicle = vehicles[0];
+  if (!request || !vehicle || vehicle.status !== "available") return null;
+  await db.update(autoswapReplacementRequests).set({ status: "matched", matchedVehicleId: vehicleId }).where(eq(autoswapReplacementRequests.id, requestId));
+  await db.update(autoswapVehicles).set({ status: "reserved" }).where(eq(autoswapVehicles.id, vehicleId));
+  const durationMs = request.expectedEndAt.getTime() - request.startAt.getTime();
+  const days = Math.max(1, Math.ceil(durationMs / 86_400_000));
+  const total = days * vehicle.dailyRateCents;
+  const result = await db.insert(autoswapRentals).values({ requestId, vehicleId, customerId: request.customerId, serviceCenterId: request.serviceCenterId, startAt: request.startAt, totalAmountCents: total, platformCommissionCents: Math.round(total * 0.15), protectionPlan: 1, status: "reserved" });
+  return Number(result[0].insertId);
+}
