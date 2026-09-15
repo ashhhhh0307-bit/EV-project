@@ -25,11 +25,7 @@ function displayDate(value: Date | string | null | undefined) { return value ? n
 
 export default function AutoSwap() {
   const { user, logout } = useAuth();
-  const [page, setPage] = useState<Page>(() => {
-    const requestedPage = window.localStorage.getItem("autoswap_post_login_page");
-    window.localStorage.removeItem("autoswap_post_login_page");
-    return requestedPage === "requests" ? "requests" : "overview";
-  });
+  const [page, setPage] = useState<Page>("overview");
   const [modal, setModal] = useState<Modal>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const snapshot = trpc.autoswap.snapshot.useQuery(undefined, { retry: false });

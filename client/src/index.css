@@ -133,3 +133,5 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 @media (max-width:680px) { .rental-notification { align-items:flex-start; }.rental-notification p { line-height:1.65; } }
 
 .request-context { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:11px; color:#8c9d95; font-size:8px; line-height:1.45; }.request-context span { display:block; }.request-context b { color:#537267; font-weight:600; }
+
+.route-primary:disabled { opacity:.58; cursor:not-allowed; filter:grayscale(.15); transform:none !important; }
