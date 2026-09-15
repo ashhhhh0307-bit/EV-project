@@ -105,13 +105,55 @@ export async function listAutoswapServiceCenters() {
 export async function listAutoswapRequests() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(autoswapReplacementRequests).orderBy(desc(autoswapReplacementRequests.createdAt));
+  return db.select({
+    id: autoswapReplacementRequests.id,
+    customerId: autoswapReplacementRequests.customerId,
+    serviceCenterId: autoswapReplacementRequests.serviceCenterId,
+    originalVehicleDescription: autoswapReplacementRequests.originalVehicleDescription,
+    requestedVehicleType: autoswapReplacementRequests.requestedVehicleType,
+    fuelPreference: autoswapReplacementRequests.fuelPreference,
+    pickupLocation: autoswapReplacementRequests.pickupLocation,
+    startAt: autoswapReplacementRequests.startAt,
+    expectedEndAt: autoswapReplacementRequests.expectedEndAt,
+    emergencyDelivery: autoswapReplacementRequests.emergencyDelivery,
+    status: autoswapReplacementRequests.status,
+    matchedVehicleId: autoswapReplacementRequests.matchedVehicleId,
+    customerName: users.name,
+    customerEmail: users.email,
+    serviceCenterName: autoswapServiceCenters.name,
+    serviceCenterCity: autoswapServiceCenters.city,
+  }).from(autoswapReplacementRequests)
+    .leftJoin(users, eq(autoswapReplacementRequests.customerId, users.id))
+    .leftJoin(autoswapServiceCenters, eq(autoswapReplacementRequests.serviceCenterId, autoswapServiceCenters.id))
+    .orderBy(desc(autoswapReplacementRequests.createdAt));
 }
 
 export async function listAutoswapRentals() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(autoswapRentals).orderBy(desc(autoswapRentals.createdAt));
+  return db.select({
+    id: autoswapRentals.id,
+    requestId: autoswapRentals.requestId,
+    vehicleId: autoswapRentals.vehicleId,
+    customerId: autoswapRentals.customerId,
+    serviceCenterId: autoswapRentals.serviceCenterId,
+    startAt: autoswapRentals.startAt,
+    endAt: autoswapRentals.endAt,
+    status: autoswapRentals.status,
+    totalAmountCents: autoswapRentals.totalAmountCents,
+    platformCommissionCents: autoswapRentals.platformCommissionCents,
+    protectionPlan: autoswapRentals.protectionPlan,
+    ownerName: users.name,
+    ownerEmail: users.email,
+    vehicleType: autoswapVehicles.vehicleType,
+    fuelType: autoswapVehicles.fuelType,
+    registrationNumber: autoswapVehicles.registrationNumber,
+    city: autoswapVehicles.city,
+    pickupAddress: autoswapVehicles.pickupAddress,
+  }).from(autoswapRentals)
+    .leftJoin(autoswapVehicles, eq(autoswapRentals.vehicleId, autoswapVehicles.id))
+    .leftJoin(users, eq(autoswapVehicles.ownerId, users.id))
+    .orderBy(desc(autoswapRentals.createdAt));
 }
 
 export async function createAutoswapVehicle(input: Omit<InsertAutoswapVehicle, "ownerId">, ownerId: number) {
@@ -135,7 +177,7 @@ export async function createAutoswapRequest(input: Omit<InsertAutoswapReplacemen
   return Number(result[0].insertId);
 }
 
-export async function matchAutoswapRequest(requestId: number, vehicleId: number) {
+export async function acceptAutoswapOffer(requestId: number, vehicleId: number) {
   const db = await getDb();
   if (!db) return null;
   const requests = await db.select().from(autoswapReplacementRequests).where(eq(autoswapReplacementRequests.id, requestId)).limit(1);
@@ -143,11 +185,11 @@ export async function matchAutoswapRequest(requestId: number, vehicleId: number)
   const request = requests[0];
   const vehicle = vehicles[0];
   if (!request || !vehicle || vehicle.status !== "available") return null;
-  await db.update(autoswapReplacementRequests).set({ status: "matched", matchedVehicleId: vehicleId }).where(eq(autoswapReplacementRequests.id, requestId));
-  await db.update(autoswapVehicles).set({ status: "reserved" }).where(eq(autoswapVehicles.id, vehicleId));
+  await db.update(autoswapReplacementRequests).set({ status: "active", matchedVehicleId: vehicleId }).where(eq(autoswapReplacementRequests.id, requestId));
+  await db.update(autoswapVehicles).set({ status: "rented" }).where(eq(autoswapVehicles.id, vehicleId));
   const durationMs = request.expectedEndAt.getTime() - request.startAt.getTime();
   const days = Math.max(1, Math.ceil(durationMs / 86_400_000));
   const total = days * vehicle.dailyRateCents;
-  const result = await db.insert(autoswapRentals).values({ requestId, vehicleId, customerId: request.customerId, serviceCenterId: request.serviceCenterId, startAt: request.startAt, totalAmountCents: total, platformCommissionCents: Math.round(total * 0.15), protectionPlan: 1, status: "reserved" });
+  const result = await db.insert(autoswapRentals).values({ requestId, vehicleId, customerId: request.customerId, serviceCenterId: request.serviceCenterId, startAt: request.startAt, totalAmountCents: total, platformCommissionCents: Math.round(total * 0.15), protectionPlan: 1, status: "active" });
   return Number(result[0].insertId);
 }
