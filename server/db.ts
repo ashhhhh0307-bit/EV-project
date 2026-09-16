@@ -12,6 +12,7 @@ import {
   users,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { rentalTotalCents } from "../shared/autoswapBooking";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -187,9 +188,32 @@ export async function acceptAutoswapOffer(requestId: number, vehicleId: number) 
   if (!request || !vehicle || vehicle.status !== "available") return null;
   await db.update(autoswapReplacementRequests).set({ status: "active", matchedVehicleId: vehicleId }).where(eq(autoswapReplacementRequests.id, requestId));
   await db.update(autoswapVehicles).set({ status: "rented" }).where(eq(autoswapVehicles.id, vehicleId));
-  const durationMs = request.expectedEndAt.getTime() - request.startAt.getTime();
-  const days = Math.max(1, Math.ceil(durationMs / 86_400_000));
-  const total = days * vehicle.dailyRateCents;
+  const total = rentalTotalCents(vehicle.dailyRateCents, request.startAt, request.expectedEndAt);
   const result = await db.insert(autoswapRentals).values({ requestId, vehicleId, customerId: request.customerId, serviceCenterId: request.serviceCenterId, startAt: request.startAt, totalAmountCents: total, platformCommissionCents: Math.round(total * 0.15), protectionPlan: 1, status: "active" });
   return Number(result[0].insertId);
+}
+
+export async function bookAutoswapVehicle(input: { vehicleId: number; pickupLocation: string; startAt: Date; expectedEndAt: Date; emergencyDelivery: number }, customerId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const vehicles = await db.select().from(autoswapVehicles).where(eq(autoswapVehicles.id, input.vehicleId)).limit(1);
+  const vehicle = vehicles[0];
+  if (!vehicle || vehicle.status !== "available") return null;
+  const requestResult = await db.insert(autoswapReplacementRequests).values({
+    customerId,
+    originalVehicleDescription: "Customer vehicle replacement booking",
+    requestedVehicleType: vehicle.vehicleType,
+    fuelPreference: vehicle.fuelType,
+    pickupLocation: input.pickupLocation,
+    startAt: input.startAt,
+    expectedEndAt: input.expectedEndAt,
+    emergencyDelivery: input.emergencyDelivery,
+    status: "active",
+    matchedVehicleId: vehicle.id,
+  });
+  const requestId = Number(requestResult[0].insertId);
+  const total = rentalTotalCents(vehicle.dailyRateCents, input.startAt, input.expectedEndAt);
+  await db.update(autoswapVehicles).set({ status: "rented" }).where(eq(autoswapVehicles.id, vehicle.id));
+  const rentalResult = await db.insert(autoswapRentals).values({ requestId, vehicleId: vehicle.id, customerId, startAt: input.startAt, endAt: input.expectedEndAt, totalAmountCents: total, platformCommissionCents: Math.round(total * 0.15), protectionPlan: vehicle.protectionIncluded, status: "active" });
+  return { rentalId: Number(rentalResult[0].insertId), requestId, totalAmountCents: total };
 }

@@ -13,6 +13,7 @@ import {
   listAutoswapServiceCenters,
   listAutoswapVehicles,
   acceptAutoswapOffer,
+  bookAutoswapVehicle,
 } from "./db";
 
 const vehicleInput = z.object({
@@ -47,6 +48,7 @@ export const appRouter = router({
     createServiceCenter: protectedProcedure.input(z.object({ name: z.string().min(1).max(120), city: z.string().min(1).max(80), address: z.string().max(500).optional(), phone: z.string().max(32).optional() })).mutation(({ input, ctx }) => createAutoswapServiceCenter({ ...input, status: "pending" }, ctx.user.id)),
     createRequest: protectedProcedure.input(z.object({ originalVehicleDescription: z.string().min(2).max(180), requestedVehicleType: z.enum(["car", "bike", "any"]), fuelPreference: z.enum(["ev", "petrol", "diesel", "any"]), pickupLocation: z.string().min(2), startAt: z.date(), expectedEndAt: z.date(), serviceCenterId: z.number().int().positive().optional(), emergencyDelivery: z.number().int().min(0).max(1).default(0) })).mutation(({ input, ctx }) => createAutoswapRequest({ ...input, status: "open" }, ctx.user.id)),
     acceptOffer: protectedProcedure.input(z.object({ requestId: z.number().int().positive(), vehicleId: z.number().int().positive() })).mutation(({ input }) => acceptAutoswapOffer(input.requestId, input.vehicleId)),
+    bookVehicle: protectedProcedure.input(z.object({ vehicleId: z.number().int().positive(), pickupLocation: z.string().min(2).max(500), startAt: z.date(), expectedEndAt: z.date(), emergencyDelivery: z.number().int().min(0).max(1).default(0) })).mutation(({ input, ctx }) => bookAutoswapVehicle(input, ctx.user.id)),
   }),
 });
 
