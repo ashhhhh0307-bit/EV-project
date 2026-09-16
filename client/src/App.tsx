@@ -5,6 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AutoSwap from "./pages/AutoSwap";
 import Login from "./pages/Login";
+import OwnerListing from "./pages/OwnerListing";
 
 function AuthGate() {
   const { user, loading } = useAuth();
@@ -20,7 +21,10 @@ function AuthGate() {
     );
   }
 
-  return user ? <AutoSwap /> : <Login />;
+  if (!user) return <Login />;
+  const ownerListingRequested = window.localStorage.getItem("autoswap_open_owner_listing") === "1";
+  if (ownerListingRequested) return <OwnerListing onBack={() => { window.localStorage.removeItem("autoswap_open_owner_listing"); window.location.reload(); }} />;
+  return <AutoSwap />;
 }
 
 function App() {
