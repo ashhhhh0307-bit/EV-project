@@ -1,97 +1,97 @@
-# AutoSwap — Smart Replacement Mobility
+# 🚗 AutoSwap — Smart Replacement Mobility
+https://autoswap-ev-project.onrender.com
 
-AutoSwap is a smart mobility-sharing platform that keeps customers moving while their cars or bikes are being serviced. Vehicle owners can list idle EV, petrol, or diesel vehicles, while service centers and customers can discover nearby replacement vehicles, compare distance and availability, and manage rental handoffs.
+## Smart Rental and Replacement Vehicle Platform
 
-> **AutoSwap:** Get a replacement vehicle instantly while your vehicle is being serviced.
+AutoSwap is a smart mobility-sharing platform that connects vehicle owners, customers, and service centers. When a customer’s vehicle is sent for servicing or repair, AutoSwap helps them find a nearby available replacement EV, view the owner’s location, compare distance and pricing, and continue travelling without interruption.
 
-## What the platform does
+## What was the project?
 
-- Vehicle owners list idle cars and bikes for short-term rental.
-- Customers discover available replacement vehicles near their current position.
-- The live availability map displays the customer position, rental-owner vehicle positions, distance between them, and available EV listings.
-- Service centers can manage replacement requests and keep customers mobile during repairs.
-- Owners can review vehicle details, pickup locations, daily rates, and rental availability.
-- Active rentals can be created from saved Browse EV listings.
-- The platform supports EV, petrol, and diesel vehicles.
-- Authentication is provided through Manus OAuth with Google/Gmail sign-in.
-- Rental, vehicle, request, service-center, and owner data are designed for persistent database storage.
+AutoSwap is designed to solve a common mobility problem: customers often lose access to transportation while their vehicle is being repaired.
 
-## Main workflows
+Instead of waiting without transport, the platform enables:
 
-### Vehicle owner
+- Vehicle owners to list idle EV, petrol, or diesel vehicles.
+- Customers to browse nearby rental vehicles.
+- Service centers to create replacement-vehicle requests.
+- Users to see their own position and available rental-owner positions on a map.
+- Customers to compare distance, pickup location, registration number, and daily rental rate.
+- Owners to earn income from vehicles that would otherwise remain unused.
 
-1. Sign in securely.
-2. Open the owner listing workspace.
-3. Add vehicle details, registration information, rate, availability, and handover location.
-4. Save the listing to the shared AutoSwap fleet.
-5. Receive booking or replacement requests for the listed vehicle.
+The basic idea is:
 
-### Customer
+> Keep every customer moving while their vehicle is being serviced.
 
-1. Sign in with Google/Gmail.
-2. Open Browse EV or Active rentals.
-3. Allow location access.
-4. View nearby available rental EVs on the map.
-5. Compare owner position, pickup address, distance, registration number, and daily rate.
-6. Select a vehicle and begin the booking workflow.
-
-### Service center
-
-1. Register or manage a service-center location.
-2. Create a replacement request for a customer.
-3. Provide vehicle type, fuel preference, repair duration, pickup location, and emergency requirements.
-4. Review nearby vehicle matches and coordinate the replacement handoff.
-
-## Technology stack
-
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, Lucide icons
-- **Backend:** Express, tRPC 11, Node.js
-- **Database:** Drizzle ORM with MySQL/TiDB through `mysql2`
-- **Authentication:** Manus OAuth / Google sign-in
-- **Maps:** Google Maps integration with browser geolocation, geocoding, markers, distance calculations, and route lines
-- **Testing:** Vitest
-- **Deployment:** Render web service
-
-## Project structure
+## 🏗️ Project Architecture
 
 ```text
-client/
-  src/
-    components/       Reusable UI and live map components
-    pages/            Login, owner listing, and AutoSwap workspace pages
-    App.tsx           Auth gate and application routes
-    index.css         Product design system and responsive styles
-server/
-  _core/              Auth, OAuth, environment, storage, and server infrastructure
-  db.ts               Database helpers and AutoSwap queries
-  routers.ts          tRPC API procedures
-  auth.logout.test.ts Authentication test coverage
-drizzle/
-  schema.ts           MySQL/TiDB database schema
-shared/
-  autoswapBooking.ts  Booking calculations and nearby-listing helpers
-  autoswapDomain.ts   Matching and rental-domain rules
-  evDomain.ts         EV registration validation
+EV-project/
+├── client/             → React 19 + Vite + TypeScript + Tailwind CSS
+├── client/src/pages/   → Login, owner listing, AutoSwap workspace
+├── client/src/components/
+│   ├── RentalAvailabilityMap.tsx → User and rental-owner live map
+│   ├── ServiceCenterMap.tsx      → Nearby service-center map
+│   └── DashboardLayout.tsx       → Shared application shell
+├── server/             → Express + tRPC backend
+│   ├── db.ts           → Database helpers and rental workflows
+│   ├── routers.ts      → Typed API procedures
+│   └── _core/          → OAuth, sessions, environment, storage
+├── drizzle/            → MySQL/TiDB schema and migrations
+├── shared/             → Matching, booking, and validation logic
+└── README.md           → Project documentation
 ```
 
-## Requirements
+## 🚀 Quick Start
 
-- Node.js 22 or newer
-- pnpm 10 or newer
-- A MySQL-compatible database: MySQL, TiDB Cloud, PlanetScale-compatible MySQL, or equivalent
-- Manus OAuth application credentials
-- Google Maps configuration supported by the project environment
+### Prerequisites
 
-## Local development
+- Node.js 22+
+- pnpm 10+
+- MySQL/TiDB-compatible database
+- Manus OAuth application
+- Google Maps configuration for map features
+
+### Step 1 — Install dependencies
 
 ```bash
+cd EV-project
 pnpm install
+```
+
+### Step 2 — Configure environment variables
+
+Create a local `.env` file. Never commit this file to GitHub.
+
+```env
+NODE_ENV=development
+VITE_APP_ID=your_manus_oauth_app_id
+JWT_SECRET=your_strong_session_secret
+OAUTH_SERVER_URL=your_oauth_server_url
+VITE_OAUTH_PORTAL_URL=your_oauth_portal_url
+OWNER_OPEN_ID=your_owner_open_id
+OWNER_NAME=your_owner_name
+DATABASE_URL=mysql://user:password@host:3306/database
+BUILT_IN_FORGE_API_URL=your_forge_api_url
+BUILT_IN_FORGE_API_KEY=your_forge_api_key
+VITE_FRONTEND_FORGE_API_URL=your_frontend_forge_api_url
+VITE_FRONTEND_FORGE_API_KEY=your_frontend_forge_api_key
+```
+
+Generate a session secret with:
+
+```bash
+openssl rand -base64 48
+```
+
+### Step 3 — Start the application
+
+```bash
 pnpm dev
 ```
 
-The development server starts the full-stack application with Vite and Express.
+The development application runs on the configured local development port.
 
-## Validation commands
+### Step 4 — Validate the project
 
 ```bash
 pnpm check
@@ -99,94 +99,196 @@ pnpm test
 pnpm build
 ```
 
-The test suite covers authentication behavior, EV registration validation, AutoSwap matching, rental calculations, nearby-listing rules, and login content contracts.
+## 🗺️ Live Rental Availability Map
 
-## Environment variables
+The Active rentals and command-center experience includes a live availability map.
 
-Create a local `.env` file only for development. Never commit it to GitHub.
+The map can show:
+
+- The user’s current GPS position.
+- Available rental-owner EV locations.
+- Distance between the user and each available vehicle.
+- Vehicle registration number and pickup location.
+- Daily rental rate.
+- Available-only rental listings.
+- A distance line between the user and the selected rental vehicle.
+- Sorted rental cards with the nearest vehicles first.
+
+The browser must be served over HTTPS and the user must allow location access for precise GPS positioning.
+
+## 🔄 AutoSwap Rental Workflow
+
+### Vehicle owner workflow
+
+1. Sign in with Google/Gmail through Manus OAuth.
+2. Open the owner listing workspace.
+3. Enter owner details, vehicle model, year, registration number, range, seats, charging type, availability, rate, and handover location.
+4. Save the vehicle listing.
+5. The listing becomes available to customers through Browse EV and Active rentals.
+
+### Customer workflow
+
+1. Sign in securely.
+2. Open Browse EV or Active rentals.
+3. Allow browser location access.
+4. View nearby available vehicles on the map.
+5. Compare distance, pickup address, registration number, owner location, and daily price.
+6. Select a vehicle and begin the booking flow.
+
+### Service-center workflow
+
+1. Register a service-center location.
+2. Create a replacement request.
+3. Enter repair duration, vehicle type, fuel preference, pickup area, and emergency requirements.
+4. Find the nearest suitable replacement vehicle.
+5. Coordinate the customer handoff.
+
+## 🧠 Matching and Booking Logic
+
+| Component | Technology | Purpose |
+|---|---|---|
+| Vehicle matching | TypeScript scoring rules | Match vehicle type, fuel preference, distance, and emergency priority |
+| Distance calculation | Google Maps geometry | Calculate user-to-owner distance |
+| Location discovery | Browser Geolocation API | Find the user’s current position |
+| Vehicle geocoding | Google Maps Geocoder | Convert saved pickup locations into map coordinates |
+| Booking calculation | Shared TypeScript helpers | Calculate rental days and total price |
+| Availability filter | Backend vehicle status | Show only vehicles currently marked available |
+| Persistence | Drizzle ORM + MySQL/TiDB | Store vehicles, requests, rentals, owners, and service centers |
+
+## 🌐 API Procedures
+
+AutoSwap uses typed tRPC procedures under `/api/trpc`.
+
+| Procedure area | Purpose |
+|---|---|
+| `auth.me` | Read the current authenticated user |
+| `auth.logout` | Clear the authenticated session |
+| `autoswap.snapshot` | Load operational dashboard metrics |
+| `autoswap.listVehicles` | Browse saved fleet vehicles |
+| `autoswap.createVehicle` | Save a new rental-owner vehicle |
+| `autoswap.listServiceCenters` | Load service-center locations |
+| `autoswap.createServiceCenter` | Register a service center |
+| `autoswap.listReplacementRequests` | Load replacement requests |
+| `autoswap.createReplacementRequest` | Create a customer replacement request |
+| `autoswap.acceptReplacementRequest` | Accept a replacement offer and create an active rental |
+| `autoswap.bookVehicle` | Book an available saved Browse EV listing |
+| `autoswap.listRentals` | Load active rental records |
+
+## 👤 Authentication
+
+Authentication uses Manus OAuth with Google/Gmail sign-in.
+
+Configure the deployed callback URL in the OAuth application:
+
+```text
+https://autoswap-ev-project.onrender.com/api/oauth/callback
+```
+
+The following must be configured in the deployment environment before Gmail verification can work:
+
+- OAuth application ID
+- OAuth server URL
+- OAuth portal URL
+- JWT session secret
+- Owner identity values
+
+No demo usernames or passwords are stored in this repository.
+
+## 📊 Dashboard Features
+
+- **Command center** — Fleet metrics, service-center metrics, open requests, and active rentals.
+- **Fleet inventory** — Saved owner vehicles and their current status.
+- **Service centers** — Map view, nearby centers, user location, and navigation actions.
+- **Replacement requests** — Customer repair requests and matching workflow.
+- **Active rentals** — Current rentals plus Browse EV availability and booking actions.
+- **Owner listing** — Vehicle details, pricing, availability, pickup location, and listing preview.
+- **Live map** — User position, rental-owner positions, distance lines, and available EV markers.
+
+## 🔌 Database
+
+The application uses a MySQL-compatible database through Drizzle ORM and `mysql2`.
+
+The main domain entities include:
+
+- Users
+- Vehicle owners
+- Vehicles
+- Service centers
+- Replacement requests
+- Rentals
+- Rental status and availability state
+
+Set the production database connection as a Render secret environment variable:
 
 ```env
-NODE_ENV=development
-VITE_APP_ID=<manus-oauth-app-id>
-JWT_SECRET=<strong-random-session-secret>
-OAUTH_SERVER_URL=<manus-oauth-server-url>
-VITE_OAUTH_PORTAL_URL=<manus-login-portal-url>
-OWNER_OPEN_ID=<project-owner-open-id>
-OWNER_NAME=<project-owner-name>
-DATABASE_URL=mysql://<user>:<password>@<host>:<port>/<database>
-BUILT_IN_FORGE_API_URL=<server-side-forge-api-url>
-BUILT_IN_FORGE_API_KEY=<server-side-forge-api-key>
-VITE_FRONTEND_FORGE_API_URL=<frontend-forge-api-url>
-VITE_FRONTEND_FORGE_API_KEY=<frontend-forge-api-key>
+DATABASE_URL=mysql://user:password@host:3306/database
 ```
 
-Generate a strong JWT secret with:
+Render PostgreSQL is not directly compatible with the current MySQL schema without migrating the database dialect and queries.
 
-```bash
-openssl rand -base64 48
-```
+## ☁️ Render Deployment
 
-The production database must be MySQL/TiDB-compatible because the project schema uses Drizzle's MySQL dialect and the `mysql2` driver.
-
-## OAuth callback
-
-For a deployed Render service, configure the OAuth application callback URL as:
+Render service configuration:
 
 ```text
-https://<your-render-service>.onrender.com/api/oauth/callback
+Runtime       → Node
+Branch        → main
+Build command → pnpm install --frozen-lockfile && pnpm build
+Start command → pnpm start
+Region        → Singapore
 ```
 
-The callback domain must be allowed by the OAuth application before Google/Gmail sign-in can complete.
-
-## Render deployment
-
-Configure a Render Node web service with:
-
-```text
-Build command: pnpm install --frozen-lockfile && pnpm build
-Start command: pnpm start
-Branch: main
-Runtime: Node
-```
-
-Add all production environment variables in Render's Environment settings. Do not place credentials in the repository, README, build command, or client-side source files.
-
-After configuring the environment:
-
-```bash
-pnpm build
-pnpm start
-```
-
-Verify these endpoints on the deployed service:
-
-```text
-GET /
-GET /api/trpc/auth.me
-GET /api/oauth/callback
-```
-
-The protected `auth.me` procedure should only return an authenticated user after the OAuth session is established.
-
-## Security notes
-
-- Never commit API keys, OAuth secrets, database passwords, JWT secrets, or `.env` files.
-- Use Render environment variables or a managed secret store for production values.
-- Use a separate production database and credentials from local development.
-- Restrict OAuth callback URLs to trusted application domains.
-- Browser geolocation requires user permission and a secure HTTPS origin.
-- Rental-owner coordinates should be displayed according to the product's privacy and handoff policy.
-
-## Current deployment
-
-The production service is deployed on Render at:
+Live service:
 
 ```text
 https://autoswap-ev-project.onrender.com
 ```
 
-The deployed service requires production OAuth and MySQL/TiDB environment variables before Gmail authentication and persistent backend data can operate fully.
+Add production secrets from Render’s Environment settings. Never place them in this README or in GitHub source files.
+
+## 🧪 Testing
+
+Run the complete test suite:
+
+```bash
+pnpm test
+```
+
+The tests cover:
+
+- Authentication logout behavior.
+- EV registration validation.
+- AutoSwap vehicle matching.
+- Rental duration and price calculations.
+- Nearby pickup matching.
+- Availability-only vehicle presentation.
+- Login content and OAuth callback helpers.
+
+## 📁 Key Files
+
+| File | Purpose |
+|---|---|
+| `client/src/pages/Login.tsx` | Google/Gmail login experience |
+| `client/src/pages/OwnerListing.tsx` | Vehicle-owner listing workflow |
+| `client/src/pages/AutoSwap.tsx` | Main rental-management workspace |
+| `client/src/components/RentalAvailabilityMap.tsx` | Live user and rental-owner map |
+| `client/src/components/ServiceCenterMap.tsx` | Service-center map and navigation |
+| `server/routers.ts` | Typed backend procedures |
+| `server/db.ts` | Database queries and rental operations |
+| `drizzle/schema.ts` | MySQL/TiDB domain schema |
+| `shared/autoswapBooking.ts` | Booking and pricing helpers |
+| `shared/autoswapDomain.ts` | Matching and domain rules |
+| `shared/evDomain.ts` | Vehicle and registration validation |
+
+## 🔒 Security Notes
+
+- Never commit `.env` files or credentials.
+- Keep JWT, OAuth, API, and database values in Render environment variables.
+- Use HTTPS for browser geolocation and Gmail authentication.
+- Do not expose database credentials in frontend code.
+- Use a production database separate from local development.
+- Restrict OAuth callback URLs to trusted domains.
 
 ## License
 
-This project is released under the MIT License.
+MIT License.
