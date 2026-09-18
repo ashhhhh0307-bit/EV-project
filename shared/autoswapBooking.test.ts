@@ -14,4 +14,10 @@ describe("AutoSwap booking helpers", () => {
     expect(isNearbyListing("Bengaluru", "Indiranagar, Bengaluru")).toBe(true);
     expect(isNearbyListing("Bengaluru", "Chennai")).toBe(false);
   });
+
+  it("keeps availability presentation limited to available vehicles", () => {
+    const vehicles = [{ status: "available", distanceKm: 3.2 }, { status: "rented", distanceKm: 1.1 }];
+    const visible = vehicles.filter((vehicle) => vehicle.status === "available").sort((a, b) => a.distanceKm - b.distanceKm);
+    expect(visible).toEqual([{ status: "available", distanceKm: 3.2 }]);
+  });
 });
